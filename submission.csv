@@ -1,0 +1,7 @@
+campaign_name,filter_arpu_segment,filter_data_segment,filter_call_segment,filter_current_tariff,target_tariff,channel
+camp_3_tariff_8_tariff_10,HIGH,,,tariff_8,tariff_10,sms
+camp_6_tariff_8_tariff_16,HIGH,,,tariff_8,tariff_16,sms
+camp_1_tariff_8_tariff_7,HIGH,,,tariff_8,tariff_7,sms
+camp_2_tariff_8_tariff_9,HIGH,,,tariff_8,tariff_9,sms
+camp_0_tariff_8_tariff_2,HIGH,,,tariff_8,tariff_2,sms
+camp_7_tariff_8_tariff_19,HIGH,,,tariff_8,tariff_19,sms
