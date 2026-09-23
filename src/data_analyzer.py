@@ -32,16 +32,29 @@ class DataAnalyzer:
     def _preprocess_profiles(self):
         if self.profiles is None or self.profiles.empty:
             return
+            
         if 'predicted_arpu' not in self.profiles.columns and 'ARPU_3m_avg' in self.profiles.columns:
             self.profiles['predicted_arpu'] = self.profiles['ARPU_3m_avg']
+            
+        # БРОНЯ ОТ NaN: Заполняем пропущенные значения нулями или медианой, чтобы не падала математика
+        if 'predicted_arpu' in self.profiles.columns:
+            self.profiles['predicted_arpu'] = self.profiles['predicted_arpu'].fillna(0)
 
     def _analyze_history(self):
         df = self.history_transitions.copy()
         if df.empty:
             return
 
-        df['rel_uplift'] = (df['arpu_after'] - df['arpu_before']) / (df['arpu_before'] + 1e-5)
-        
+        # ЗАЩИТА: Если организаторы не дадут историю ARPU, используем дефолтные значения
+        if 'arpu_after' in df.columns and 'arpu_before' in df.columns:
+            df['rel_uplift'] = (df['arpu_after'] - df['arpu_before']) / (df['arpu_before'] + 1e-5)
+        else:
+            df['rel_uplift'] = 0.05  # Базовый минимальный прирост
+
+        # ЗАЩИТА: Проверяем наличие целевых колонок перед группировкой
+        if 'current_tariff' not in df.columns or 'target_tariff' not in df.columns:
+            return 
+
         grouped = df.groupby(['current_tariff', 'target_tariff']).agg(
             sample_size=('rel_uplift', 'count'),
             mean_uplift=('rel_uplift', 'mean'),
@@ -64,6 +77,7 @@ class DataAnalyzer:
         if self.profiles is None:
             return pd.DataFrame()
         df = self.profiles.copy()
+        
         if arpu_seg:
             df = df[df['arpu_segment'] == arpu_seg]
         if data_seg:
@@ -73,4 +87,5 @@ class DataAnalyzer:
         if current_tariff:
             tariffs = current_tariff.split(';')
             df = df[df['current_tariff'].isin(tariffs)]
+            
         return df
